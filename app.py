@@ -130,8 +130,8 @@ def main():
 
     with st.sidebar:
         st.header("Settings")
-        api_key = st.text_input("OpenAI API key", type="password",
-                                value=os.getenv("OPENAI_API_KEY", ""))
+        api_key = st.text_input("OpenAI API key (optional)", type="password")
+        api_key = api_key or os.getenv("OPENAI_API_KEY", "")
         model = st.text_input("Model", value=DEFAULT_MODEL)
         country = st.text_input("Your country (optional)", placeholder="e.g. Bangladesh")
         max_searches = st.slider("Max web searches per check", 1, 6, 3,
