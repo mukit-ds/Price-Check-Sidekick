@@ -19,6 +19,10 @@ Given a product name or link, use web search to:
 4. Judge whether to BUY now, WAIT (a better deal or newer model is likely soon), or SKIP.
 
 Rules:
+- If the input is a link or an ASIN/SKU, first identify the product NAME, then search by name. Do not rely on one page: Amazon often hides prices from scrapers.
+- Search at least 3 different retailers (for example Walmart, Target, Ulta, Best Buy, the brand's own site) before giving up on a price.
+- Every "url" must be a specific product page. Never use a homepage like https://www.amazon.com/.
+- If you verified fewer than 2 real prices, set verdict to "UNSURE" instead of guessing BUY/WAIT/SKIP.
 - Only report prices you actually found in search results. Never invent prices or URLs.
 - If you cannot find a price, say so in the note and leave price as "unknown".
 - Be brief and concrete. No marketing language.
@@ -27,7 +31,7 @@ Rules:
 Reply with ONLY a JSON object (no markdown fences, no extra text) in this shape:
 {
   "product": "exact product name",
-  "verdict": "BUY" | "WAIT" | "SKIP",
+  "verdict": "BUY" | "WAIT" | "SKIP" | "UNSURE",
   "confidence": "low" | "medium" | "high",
   "one_line": "one sentence verdict summary",
   "price_range": "e.g. $299 - $349",
@@ -44,6 +48,7 @@ VERDICT_STYLE = {
     "BUY": ("#1b8a3d", "Buy now"),
     "WAIT": ("#c98a00", "Wait"),
     "SKIP": ("#c0392b", "Skip it"),
+    "UNSURE": ("#6c757d", "Not enough data"),
 }
 
 
@@ -130,11 +135,11 @@ def main():
 
     with st.sidebar:
         st.header("Settings")
-        api_key = st.text_input("OpenAI API key (optional)", type="password")
-        api_key = api_key or os.getenv("OPENAI_API_KEY", "")
+        api_key = st.text_input("OpenAI API key", type="password",
+                                value=os.getenv("OPENAI_API_KEY", ""))
         model = st.text_input("Model", value=DEFAULT_MODEL)
         country = st.text_input("Your country (optional)", placeholder="e.g. Bangladesh")
-        max_searches = st.slider("Max web searches per check", 1, 6, 3,
+        max_searches = st.slider("Max web searches per check", 1, 8, 5,
                                  help="Each search costs money. Lower = cheaper.")
 
     query = st.text_input("Product name or link",
